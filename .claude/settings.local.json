@@ -34,7 +34,13 @@
       "Bash(curl -s -o /dev/null -w 'time: %{time_total}s\\\\n' --max-time 15 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&search=Catan')",
       "Bash(curl -s -D - -o /dev/null --max-time 15 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&search=Catan')",
       "Bash(gh --version)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git ls-remote *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
