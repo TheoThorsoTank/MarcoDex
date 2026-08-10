@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --skip-install)",
+      "Bash(rm -rf board-game-tracker)",
+      "Bash(npx --yes create-next-app@latest board-game-tracker --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --skip-install)",
+      "Bash(DEST=\"C:\\\\Users\\\\marco\\\\OneDrive\\\\Documenten\\\\SecondBrain - MarcoDex\\\\MarcoDex\\\\20 - Areas\\\\Games2Play\" *)",
+      "Bash(node scripts/generate-icons.mjs)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 10 \"https://boardgamegeek.com/xmlapi2/search?type=boardgame&query=Wingspan\")",
+      "Bash(curl -s -D - -o /tmp/bgg_resp.xml --max-time 10 -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0 Safari/537.36\" \"https://boardgamegeek.com/xmlapi2/search?type=boardgame&query=Wingspan\")",
+      "Bash(curl -s --max-time 10 -A \"Mozilla/5.0\" \"https://boardgamegeek.com/using_the_xml_api\")",
+      "Bash(grep -rn suppressHydrationWarning 'C:\\\\Users\\\\marco\\\\OneDrive\\\\Documenten\\\\SecondBrain - MarcoDex\\\\MarcoDex\\\\20 - Areas\\\\Games2Play/src')",
+      "Bash(echo \"not present yet\")",
+      "Bash(npx tsc *)",
+      "Bash(echo \"TSC EXIT: $?\")",
+      "Bash(curl -s -D - -o /dev/null --max-time 10 -H \"Origin: https://example.com\" -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0 Safari/537.36\" \"https://boardgamegeek.com/xmlapi2/search?type=boardgame&query=Catan\")",
+      "Bash(curl -s -D - -o /tmp/bgg2.xml --max-time 10 -H 'User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.9' -H 'Referer: https://boardgamegeek.com/' -H 'sec-ch-ua: \"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"' -H 'sec-ch-ua-mobile: ?0' -H 'sec-ch-ua-platform: \"Windows\"' -H 'Sec-Fetch-Site: same-origin' -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Dest: document' 'https://boardgamegeek.com/xmlapi2/search?type=boardgame&query=Catan')",
+      "Bash(curl -s -D - -o /dev/null --max-time 10 -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36\" \"https://boardgamegeek.com/xmlapi2/hot?type=boardgame\")",
+      "Bash(curl -s -D - -o /dev/null --max-time 10 -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36\" \"https://boardgamegeek.com/xmlapi/search?search=Catan\")",
+      "Bash(curl -s -D - -o /dev/null --max-time 10 -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36\" \"https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&objectid=13\")",
+      "Bash(curl -s --max-time 10 -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36\" \"https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&objectid=13\" -o /tmp/geekitem.json)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s --max-time 10 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&objectid=13' -o 'C:\\\\Users\\\\marco\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-marco-OneDrive-Documenten-SecondBrain---MarcoDex-MarcoDex-20---Areas-Games2Play\\\\603e8332-79d6-4df2-8a8d-59ff8008b070\\\\scratchpad/geekitem.json')",
+      "Bash(curl -s -D - -o /tmp/bggsearch2.json --max-time 10 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' -H 'Accept: application/json, text/plain, */*' -H 'X-Requested-With: XMLHttpRequest' 'https://boardgamegeek.com/search/boardgame?nosession=1&q=Wingspan&showcount=20')",
+      "Bash(curl -s --max-time 10 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&search=Catan' -o 'C:\\\\Users\\\\marco\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-marco-OneDrive-Documenten-SecondBrain---MarcoDex-MarcoDex-20---Areas-Games2Play\\\\603e8332-79d6-4df2-8a8d-59ff8008b070\\\\scratchpad/geeksearch2.json')",
+      "Bash(npm uninstall *)",
+      "Bash(curl -s --max-time 10 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&subtype=boardgame&search=Wingspan' -o 'C:\\\\Users\\\\marco\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-marco-OneDrive-Documenten-SecondBrain---MarcoDex-MarcoDex-20---Areas-Games2Play\\\\603e8332-79d6-4df2-8a8d-59ff8008b070\\\\scratchpad/geeksearch3.json')",
+      "Bash(curl -s -o /dev/null -w 'size: %{size_download} bytes, time: %{time_total}s, ttfb: %{time_starttransfer}s\\\\n' --max-time 15 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&search=Wingspan')",
+      "Bash(curl -s -o /dev/null -w 'size: %{size_download} bytes, time: %{time_total}s, ttfb: %{time_starttransfer}s\\\\n' --max-time 15 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&search=Wingspan')",
+      "Bash(curl -s -o /dev/null -w 'time: %{time_total}s\\\\n' --max-time 15 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&objectid=266192')",
+      "Bash(curl -s -o /dev/null -w 'time: %{time_total}s\\\\n' --max-time 15 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&search=Catan')",
+      "Bash(curl -s -D - -o /dev/null --max-time 15 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&search=Catan')",
+      "Bash(gh --version)",
+      "Bash(gh auth *)"
+    ]
+  }
+}
