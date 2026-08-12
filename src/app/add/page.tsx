@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db, type GameStatus } from "@/lib/db";
+import { db, type GameTag } from "@/lib/db";
 import type { BggGameDetails, BggSearchResult } from "@/lib/bgg";
 import StarRating from "@/components/StarRating";
+import TagToggle from "@/components/TagToggle";
 
 // BGG's search endpoint is slow (multi-second server-side lookups) and sends
 // no-cache headers, so we cache results per query string for this session to
@@ -20,11 +21,11 @@ export default function AddPage() {
 
   const [selected, setSelected] = useState<BggGameDetails | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [existing, setExisting] = useState<{ id: number; status: GameStatus } | null>(null);
+  const [existing, setExisting] = useState<{ id: number; tags: GameTag[] } | null>(null);
 
-  const [status, setStatus] = useState<GameStatus>("library");
+  const [tags, setTags] = useState<GameTag[]>(["played"]);
   const [rating, setRating] = useState(0);
-  const [playCount, setPlayCount] = useState(1);
+  const [legacyPlayCount, setLegacyPlayCount] = useState(1);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -88,14 +89,14 @@ export default function AddPage() {
     try {
       const found = await db.games.where("bggId").equals(result.id).first();
       if (found) {
-        setExisting({ id: found.id!, status: found.status });
+        setExisting({ id: found.id!, tags: found.tags });
       }
       const res = await fetch(`/api/bgg/thing?id=${result.id}`);
       const details: BggGameDetails = await res.json();
       setSelected(details);
-      setStatus("library");
+      setTags(["played"]);
       setRating(0);
-      setPlayCount(1);
+      setLegacyPlayCount(1);
       setNotes("");
     } finally {
       setLoadingDetails(false);
@@ -103,10 +104,11 @@ export default function AddPage() {
   }
 
   async function save() {
-    if (!selected) return;
+    if (!selected || tags.length === 0) return;
     setSaving(true);
     const now = new Date().toISOString();
-    const id = await db.games.add({
+    const isPlayed = tags.includes("played");
+    await db.games.add({
       bggId: selected.id,
       name: selected.name,
       yearPublished: selected.yearPublished,
@@ -115,16 +117,15 @@ export default function AddPage() {
       minPlayers: selected.minPlayers,
       maxPlayers: selected.maxPlayers,
       playingTime: selected.playingTime,
-      status,
-      rating: status === "library" ? rating || undefined : undefined,
-      playCount: status === "library" ? playCount : undefined,
+      tags,
+      rating: isPlayed ? rating || undefined : undefined,
+      legacyPlayCount: isPlayed ? legacyPlayCount : undefined,
       notes: notes.trim() || undefined,
       dateAdded: now,
       dateUpdated: now,
     });
     setSaving(false);
-    router.push(status === "library" ? `/` : `/wishlist`);
-    void id;
+    router.push(tags.includes("wishlist") && !isPlayed ? "/wishlist" : "/");
   }
 
   return (
@@ -184,54 +185,36 @@ export default function AddPage() {
 
           {existing ? (
             <div className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-              Already in your {existing.status === "library" ? "Library" : "Wishlist"}.{" "}
-              <button
-                onClick={() => router.push(`/game/${existing.id}`)}
-                className="underline"
-              >
+              Already added — tagged {existing.tags.join(", ") || "(no tags)"}.{" "}
+              <button onClick={() => router.push(`/game/${existing.id}`)} className="underline">
                 Edit it instead
               </button>
             </div>
           ) : (
             <div className="mt-4 flex flex-col gap-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setStatus("library")}
-                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
-                    status === "library"
-                      ? "bg-amber-600 text-white"
-                      : "bg-neutral-100 dark:bg-neutral-800"
-                  }`}
-                >
-                  Played
-                </button>
-                <button
-                  onClick={() => setStatus("wishlist")}
-                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
-                    status === "wishlist"
-                      ? "bg-amber-600 text-white"
-                      : "bg-neutral-100 dark:bg-neutral-800"
-                  }`}
-                >
-                  Wishlist
-                </button>
+              <div>
+                <label className="mb-1 block text-sm text-neutral-500">Tags</label>
+                <TagToggle value={tags} onChange={setTags} />
               </div>
 
-              {status === "library" ? (
+              {tags.includes("played") ? (
                 <>
                   <div>
                     <label className="mb-1 block text-sm text-neutral-500">Rating</label>
                     <StarRating value={rating} onChange={setRating} />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm text-neutral-500">Times played</label>
+                    <label className="mb-1 block text-sm text-neutral-500">Times played before now</label>
                     <input
                       type="number"
-                      min={1}
-                      value={playCount}
-                      onChange={(e) => setPlayCount(Number(e.target.value) || 1)}
+                      min={0}
+                      value={legacyPlayCount}
+                      onChange={(e) => setLegacyPlayCount(Number(e.target.value) || 0)}
                       className="w-24 rounded-lg border border-black/10 bg-white px-3 py-1.5 dark:border-white/10 dark:bg-neutral-950"
                     />
+                    <p className="mt-1 text-xs text-neutral-500">
+                      Use &ldquo;Log a play&rdquo; afterwards to track dated plays going forward.
+                    </p>
                   </div>
                 </>
               ) : null}
@@ -249,10 +232,10 @@ export default function AddPage() {
 
               <button
                 onClick={save}
-                disabled={saving}
+                disabled={saving || tags.length === 0}
                 className="rounded-lg bg-amber-600 px-4 py-2 font-medium text-white hover:bg-amber-700 disabled:opacity-50"
               >
-                {saving ? "Saving…" : `Add to ${status === "library" ? "Library" : "Wishlist"}`}
+                {saving ? "Saving…" : tags.length === 0 ? "Pick at least one tag" : "Add game"}
               </button>
             </div>
           )}

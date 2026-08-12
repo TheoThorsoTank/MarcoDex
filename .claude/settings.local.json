@@ -40,7 +40,11 @@
       "Bash(git branch *)",
       "Bash(git ls-remote *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npm view *)",
+      "Bash(cd 'C:\\\\Users\\\\marco\\\\OneDrive\\\\Documenten\\\\SecondBrain - MarcoDex\\\\MarcoDex\\\\20 - Areas\\\\Games2Play')",
+      "Bash(git status *)"
     ]
   }
 }

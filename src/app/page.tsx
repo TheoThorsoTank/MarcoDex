@@ -6,27 +6,55 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import GameCard from "@/components/GameCard";
 
-type SortKey = "rating" | "dateAdded";
+type SortKey = "rating" | "dateAdded" | "mostPlayed" | "recentlyPlayed";
 
-export default function LibraryPage() {
+export default function PlayedPage() {
   const [sort, setSort] = useState<SortKey>("dateAdded");
-  const games = useLiveQuery(() => db.games.where("status").equals("library").toArray(), []);
+
+  const data = useLiveQuery(async () => {
+    const games = await db.games.where("tags").equals("played").toArray();
+    const gameIds = games.map((g) => g.id).filter((id): id is number => id !== undefined);
+    const plays = gameIds.length ? await db.plays.where("gameId").anyOf(gameIds).toArray() : [];
+
+    const statsByGame = new Map<number, { count: number; lastPlayedAt: string | null }>();
+    for (const g of games) {
+      if (g.id === undefined) continue;
+      const gamePlays = plays.filter((p) => p.gameId === g.id);
+      const count = (g.legacyPlayCount ?? 0) + gamePlays.length;
+      const lastPlayedAt = gamePlays.length
+        ? gamePlays.reduce((max, p) => (p.playedAt > max ? p.playedAt : max), gamePlays[0].playedAt)
+        : null;
+      statsByGame.set(g.id, { count, lastPlayedAt });
+    }
+    return { games, statsByGame };
+  }, []);
 
   const sorted = useMemo(() => {
-    if (!games) return undefined;
+    if (!data) return undefined;
+    const { games, statsByGame } = data;
     const copy = [...games];
     if (sort === "rating") {
       copy.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    } else if (sort === "mostPlayed") {
+      copy.sort(
+        (a, b) => (statsByGame.get(b.id ?? -1)?.count ?? 0) - (statsByGame.get(a.id ?? -1)?.count ?? 0)
+      );
+    } else if (sort === "recentlyPlayed") {
+      copy.sort((a, b) => {
+        const aDate = statsByGame.get(a.id ?? -1)?.lastPlayedAt ?? "";
+        const bDate = statsByGame.get(b.id ?? -1)?.lastPlayedAt ?? "";
+        return bDate.localeCompare(aDate);
+      });
     } else {
       copy.sort((a, b) => b.dateAdded.localeCompare(a.dateAdded));
     }
     return copy;
-  }, [games, sort]);
+  }, [data, sort]);
 
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Library</h1>
+        <h1 className="text-2xl font-semibold">Played</h1>
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortKey)}
@@ -34,6 +62,8 @@ export default function LibraryPage() {
         >
           <option value="dateAdded">Recently added</option>
           <option value="rating">Top rated</option>
+          <option value="mostPlayed">Most played</option>
+          <option value="recentlyPlayed">Recently played</option>
         </select>
       </div>
 

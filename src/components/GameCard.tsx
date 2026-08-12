@@ -1,8 +1,11 @@
 import Link from "next/link";
 import type { GameRecord } from "@/lib/db";
 import StarRating from "./StarRating";
+import { usePlayStats } from "@/lib/usePlayStats";
 
 export default function GameCard({ game }: { game: GameRecord }) {
+  const stats = usePlayStats(game.id, game.legacyPlayCount ?? 0);
+
   return (
     <Link
       href={`/game/${game.id}`}
@@ -28,15 +31,20 @@ export default function GameCard({ game }: { game: GameRecord }) {
             ? ` · ${game.minPlayers}–${game.maxPlayers} players`
             : ""}
         </p>
-        {game.status === "library" ? (
+        {game.tags.includes("played") ? (
           <div className="flex items-center gap-2">
             <StarRating value={game.rating ?? 0} size="sm" />
-            {game.playCount ? (
+            {stats?.playCount ? (
               <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                played {game.playCount}×
+                played {stats.playCount}×
               </span>
             ) : null}
           </div>
+        ) : null}
+        {game.tags.includes("owned") ? (
+          <span className="w-fit rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+            Owned
+          </span>
         ) : null}
       </div>
     </Link>

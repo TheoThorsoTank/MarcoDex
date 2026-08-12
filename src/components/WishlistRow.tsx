@@ -1,22 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { GameRecord } from "@/lib/db";
 import { db } from "@/lib/db";
+import LogPlayModal from "./LogPlayModal";
 
 export default function WishlistRow({ game }: { game: GameRecord }) {
-  const router = useRouter();
+  const [showLogPlay, setShowLogPlay] = useState(false);
 
-  async function markAsPlayed(e: React.MouseEvent) {
-    e.preventDefault();
+  async function handlePlayLogged() {
     if (!game.id) return;
-    await db.games.update(game.id, {
-      status: "library",
-      playCount: 1,
-      dateUpdated: new Date().toISOString(),
-    });
-    router.push(`/game/${game.id}`);
+    const current = await db.games.get(game.id);
+    if (current?.tags.includes("wishlist")) {
+      await db.games.update(game.id, {
+        tags: current.tags.filter((t) => t !== "wishlist"),
+        dateUpdated: new Date().toISOString(),
+      });
+    }
   }
 
   return (
@@ -39,11 +40,19 @@ export default function WishlistRow({ game }: { game: GameRecord }) {
         </div>
       </Link>
       <button
-        onClick={markAsPlayed}
+        onClick={() => setShowLogPlay(true)}
         className="shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
       >
         Mark played
       </button>
+      {game.id ? (
+        <LogPlayModal
+          gameId={game.id}
+          open={showLogPlay}
+          onClose={() => setShowLogPlay(false)}
+          onSaved={handlePlayLogged}
+        />
+      ) : null}
     </div>
   );
 }

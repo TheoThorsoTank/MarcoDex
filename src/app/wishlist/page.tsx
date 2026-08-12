@@ -6,10 +6,10 @@ import { db } from "@/lib/db";
 import WishlistRow from "@/components/WishlistRow";
 
 export default function WishlistPage() {
-  const games = useLiveQuery(
-    () => db.games.where("status").equals("wishlist").reverse().sortBy("dateAdded"),
-    []
-  );
+  const games = useLiveQuery(async () => {
+    const items = await db.games.where("tags").equals("wishlist").toArray();
+    return items.sort((a, b) => b.dateAdded.localeCompare(a.dateAdded));
+  }, []);
 
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
