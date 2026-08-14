@@ -4,17 +4,10 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type GameTag } from "@/lib/db";
-import { deletePlay } from "@/lib/plays";
 import StarRating from "@/components/StarRating";
 import TagToggle from "@/components/TagToggle";
-import LogPlayModal from "@/components/LogPlayModal";
-
-function formatPlayedAt(iso: string): string {
-  return new Date(iso).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
+import LogGameModal from "@/components/LogGameModal";
+import GameLogEditor from "@/components/GameLogEditor";
 
 export default function GameEditPage() {
   const params = useParams<{ id: string }>();
@@ -22,17 +15,14 @@ export default function GameEditPage() {
   const router = useRouter();
 
   const game = useLiveQuery(() => db.games.get(id), [id]);
-  const plays = useLiveQuery(
-    () => db.plays.where("gameId").equals(id).reverse().sortBy("playedAt"),
-    [id]
-  );
+  const gameLogs = useLiveQuery(() => db.gameLogs.where("gameId").equals(id).toArray(), [id]);
 
   const [tags, setTags] = useState<GameTag[]>([]);
   const [rating, setRating] = useState(0);
   const [legacyPlayCount, setLegacyPlayCount] = useState(0);
   const [notes, setNotes] = useState("");
   const [hydratedId, setHydratedId] = useState<number | null>(null);
-  const [showLogPlay, setShowLogPlay] = useState(false);
+  const [showLogGame, setShowLogGame] = useState(false);
 
   if (game && hydratedId !== game.id) {
     setHydratedId(game.id ?? null);
@@ -47,7 +37,7 @@ export default function GameEditPage() {
   }
 
   const currentGame = game;
-  const totalPlayCount = legacyPlayCount + (plays?.length ?? 0);
+  const totalSessions = legacyPlayCount + (gameLogs?.length ?? 0);
 
   async function handleSave() {
     if (tags.length === 0) return;
@@ -63,24 +53,18 @@ export default function GameEditPage() {
   }
 
   async function handleDelete() {
-    if (!confirm(`Remove "${currentGame.name}" and its play history?`)) {
+    if (!confirm(`Remove "${currentGame.name}" and its logged games?`)) {
       return;
     }
-    await db.transaction("rw", db.games, db.plays, async () => {
-      await db.plays.where("gameId").equals(id).delete();
+    await db.transaction("rw", db.games, db.gameLogs, async () => {
+      await db.gameLogs.where("gameId").equals(id).delete();
       await db.games.delete(id);
     });
     router.push("/");
   }
 
-  async function handleDeletePlay(playId: number | undefined) {
-    if (playId === undefined) return;
-    if (!confirm("Delete this play?")) return;
-    await deletePlay(playId);
-  }
-
-  async function handlePlayLogged() {
-    // Logging a play may have auto-added the "played" tag in the DB — keep
+  async function handleGameLogged() {
+    // Logging a game may have auto-added the "played" tag in the DB — keep
     // the in-progress form state (which the user could still be editing) in sync.
     const updated = await db.games.get(id);
     if (updated) setTags(updated.tags);
@@ -106,8 +90,20 @@ export default function GameEditPage() {
             {game.minPlayers && game.maxPlayers ? ` · ${game.minPlayers}–${game.maxPlayers} players` : ""}
             {game.playingTime ? ` · ~${game.playingTime} min` : ""}
           </p>
+          {game.bggRating ? (
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              BGG rating: {game.bggRating.toFixed(1)}
+            </p>
+          ) : null}
         </div>
       </div>
+
+      {game.description ? (
+        <details className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+          <summary className="cursor-pointer text-neutral-500">Description</summary>
+          <p className="mt-2 whitespace-pre-line">{game.description}</p>
+        </details>
+      ) : null}
 
       <div className="mt-5 flex flex-col gap-4">
         <div>
@@ -122,7 +118,7 @@ export default function GameEditPage() {
               <StarRating value={rating} onChange={setRating} />
             </div>
             <div>
-              <label className="mb-1 block text-sm text-neutral-500">Plays before tracking</label>
+              <label className="mb-1 block text-sm text-neutral-500">Sessions before tracking</label>
               <input
                 type="number"
                 min={0}
@@ -157,45 +153,24 @@ export default function GameEditPage() {
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h2 className="font-medium">Play history</h2>
-              <p className="text-xs text-neutral-500">{totalPlayCount} total plays</p>
+              <p className="text-xs text-neutral-500">{totalSessions} sessions logged</p>
             </div>
             <button
-              onClick={() => setShowLogPlay(true)}
+              onClick={() => setShowLogGame(true)}
               className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700"
             >
-              Log a play
+              Log a game
             </button>
           </div>
 
-          {plays && plays.length === 0 ? (
-            <p className="text-sm text-neutral-500">No dated plays logged yet.</p>
+          {gameLogs && gameLogs.length === 0 ? (
+            <p className="text-sm text-neutral-500">No sessions logged yet.</p>
           ) : (
-            <ul className="flex flex-col gap-2">
-              {plays?.map((play) => (
-                <li
-                  key={play.id}
-                  className="flex items-start justify-between rounded-lg border border-black/10 p-3 text-sm dark:border-white/10"
-                >
-                  <div>
-                    <p className="font-medium">{formatPlayedAt(play.playedAt)}</p>
-                    {play.players.length > 0 ? (
-                      <p className="text-neutral-500">
-                        {play.players
-                          .map((p) => (p.score !== undefined ? `${p.name} (${p.score})` : p.name))
-                          .join(", ")}
-                      </p>
-                    ) : null}
-                  </div>
-                  <button
-                    onClick={() => handleDeletePlay(play.id)}
-                    aria-label="Delete play"
-                    className="text-neutral-400 hover:text-red-600"
-                  >
-                    ✕
-                  </button>
-                </li>
+            <div className="flex flex-col gap-3">
+              {gameLogs?.map((log) => (
+                <GameLogEditor key={log.id} gameLog={log} onDeleted={() => {}} />
               ))}
-            </ul>
+            </div>
           )}
         </div>
 
@@ -208,11 +183,11 @@ export default function GameEditPage() {
       </div>
 
       {game.id ? (
-        <LogPlayModal
+        <LogGameModal
           gameId={game.id}
-          open={showLogPlay}
-          onClose={() => setShowLogPlay(false)}
-          onSaved={handlePlayLogged}
+          open={showLogGame}
+          onClose={() => setShowLogGame(false)}
+          onSaved={handleGameLogged}
         />
       ) : null}
     </div>

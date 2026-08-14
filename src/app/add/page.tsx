@@ -117,6 +117,8 @@ export default function AddPage() {
       minPlayers: selected.minPlayers,
       maxPlayers: selected.maxPlayers,
       playingTime: selected.playingTime,
+      description: selected.description,
+      bggRating: selected.bggRating,
       tags,
       rating: isPlayed ? rating || undefined : undefined,
       legacyPlayCount: isPlayed ? legacyPlayCount : undefined,
@@ -180,8 +182,19 @@ export default function AddPage() {
                   : ""}
                 {selected.playingTime ? ` · ~${selected.playingTime} min` : ""}
               </p>
+              {selected.bggRating ? (
+                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                  BGG rating: {selected.bggRating.toFixed(1)}
+                </p>
+              ) : null}
             </div>
           </div>
+
+          {selected.description ? (
+            <p className="mt-3 line-clamp-3 whitespace-pre-line text-sm text-neutral-600 dark:text-neutral-400">
+              {selected.description}
+            </p>
+          ) : null}
 
           {existing ? (
             <div className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300">
@@ -204,7 +217,7 @@ export default function AddPage() {
                     <StarRating value={rating} onChange={setRating} />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm text-neutral-500">Times played before now</label>
+                    <label className="mb-1 block text-sm text-neutral-500">Sessions before tracking</label>
                     <input
                       type="number"
                       min={0}
@@ -213,7 +226,7 @@ export default function AddPage() {
                       className="w-24 rounded-lg border border-black/10 bg-white px-3 py-1.5 dark:border-white/10 dark:bg-neutral-950"
                     />
                     <p className="mt-1 text-xs text-neutral-500">
-                      Use &ldquo;Log a play&rdquo; afterwards to track dated plays going forward.
+                      Use &ldquo;Log a game&rdquo; afterwards to track dated sessions going forward.
                     </p>
                   </div>
                 </>

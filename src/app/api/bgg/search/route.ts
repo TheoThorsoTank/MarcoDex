@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BGG_FETCH_HEADERS, GEEKDO_ITEMS_URL, type BggSearchResult } from "@/lib/bgg";
+import { bggFetch, BggAuthError } from "@/lib/bggClient";
+import type { BggSearchResult } from "@/lib/bgg";
 
-interface GeekdoSearchItem {
-  objectid: string;
-  objecttype: string;
-  name: string;
+function asArray<T>(value: T | T[] | undefined): T[] {
+  if (value === undefined) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+interface ParsedNameField {
+  "@_value"?: string;
+}
+
+interface ParsedSearchItem {
+  "@_id"?: string;
+  name?: ParsedNameField | ParsedNameField[];
+  yearpublished?: { "@_value"?: string };
+}
+
+interface ParsedSearchResponse {
+  items?: { item?: ParsedSearchItem | ParsedSearchItem[] };
 }
 
 export async function GET(req: NextRequest) {
@@ -13,31 +27,33 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ results: [] });
   }
 
-  const url = `${GEEKDO_ITEMS_URL}?nosession=1&objecttype=boardgame&search=${encodeURIComponent(q)}`;
-
-  let res: Response;
+  let parsed: ParsedSearchResponse;
   try {
-    res = await fetch(url, { headers: BGG_FETCH_HEADERS });
+    parsed = (await bggFetch(
+      `/search?type=boardgame&query=${encodeURIComponent(q)}`
+    )) as ParsedSearchResponse;
   } catch (err) {
+    if (err instanceof BggAuthError) {
+      console.error("BGG auth error", err.message);
+      return NextResponse.json({ error: err.message }, { status: 401 });
+    }
     console.error("BGG search request failed", err);
-    return NextResponse.json({ error: "Couldn't reach BoardGameGeek." }, { status: 502 });
+    return NextResponse.json({ error: "BoardGameGeek search failed." }, { status: 502 });
   }
 
-  if (!res.ok) {
-    console.error("BGG search returned", res.status, await res.text());
-    return NextResponse.json(
-      { error: `BoardGameGeek search failed (${res.status}).` },
-      { status: 502 }
-    );
-  }
+  const items = asArray(parsed.items?.item);
+  const mapped: BggSearchResult[] = items.map((item) => {
+    const names = asArray(item.name);
+    return {
+      id: Number(item["@_id"]),
+      name: names[0]?.["@_value"] ?? "Unknown",
+      yearPublished: item.yearpublished?.["@_value"]
+        ? Number(item.yearpublished["@_value"])
+        : undefined,
+    };
+  });
 
-  const data = (await res.json()) as { items?: GeekdoSearchItem[] };
-  const items = data.items ?? [];
   const needle = q.toLowerCase();
-
-  // This endpoint has no subtype filter, so expansions/accessories/organizers all
-  // come back mixed in with base games. Rank closer name matches first so the
-  // actual game the user is looking for tends to surface near the top.
   const rank = (name: string) => {
     const lower = name.toLowerCase();
     if (lower === needle) return 0;
@@ -47,9 +63,7 @@ export async function GET(req: NextRequest) {
   };
 
   const seen = new Set<number>();
-  const results: BggSearchResult[] = items
-    .filter((item) => item.objecttype === "thing")
-    .map((item) => ({ id: Number(item.objectid), name: item.name }))
+  const results = mapped
     .sort((a, b) => rank(a.name) - rank(b.name) || a.name.length - b.name.length)
     .filter((item) => (seen.has(item.id) ? false : (seen.add(item.id), true)))
     .slice(0, 20);

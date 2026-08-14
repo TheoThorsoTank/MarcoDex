@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { GameRecord } from "@/lib/db";
 import StarRating from "./StarRating";
-import { usePlayStats } from "@/lib/usePlayStats";
+import { useGameLogStats } from "@/lib/useGameLogStats";
 
 export default function GameCard({ game }: { game: GameRecord }) {
-  const stats = usePlayStats(game.id, game.legacyPlayCount ?? 0);
+  const stats = useGameLogStats(game.id, game.legacyPlayCount ?? 0);
 
   return (
     <Link
@@ -34,9 +34,9 @@ export default function GameCard({ game }: { game: GameRecord }) {
         {game.tags.includes("played") ? (
           <div className="flex items-center gap-2">
             <StarRating value={game.rating ?? 0} size="sm" />
-            {stats?.playCount ? (
+            {stats?.logCount ? (
               <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                played {stats.playCount}×
+                played {stats.logCount}×
               </span>
             ) : null}
           </div>

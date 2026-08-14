@@ -44,7 +44,12 @@
       "Bash(git push *)",
       "Bash(npm view *)",
       "Bash(cd 'C:\\\\Users\\\\marco\\\\OneDrive\\\\Documenten\\\\SecondBrain - MarcoDex\\\\MarcoDex\\\\20 - Areas\\\\Games2Play')",
-      "Bash(git status *)"
+      "Bash(git status *)",
+      "Bash(curl -s --max-time 10 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' 'https://api.geekdo.com/api/geekitems?nosession=1&objecttype=boardgame&objectid=13' -o 'C:\\\\Users\\\\marco\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-marco-OneDrive-Documenten-SecondBrain---MarcoDex-MarcoDex-20---Areas-Games2Play\\\\603e8332-79d6-4df2-8a8d-59ff8008b070\\\\scratchpad/geekitem_full.json')",
+      "Bash(node inspect2.mjs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 10 -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36\" \"https://boardgamegeek.com/boardgame/13/catan\")",
+      "Bash(curl -s --max-time 15 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' https://boardgamegeek.com/boardgame/13/catan -o 'C:\\\\Users\\\\marco\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-marco-OneDrive-Documenten-SecondBrain---MarcoDex-MarcoDex-20---Areas-Games2Play\\\\603e8332-79d6-4df2-8a8d-59ff8008b070\\\\scratchpad/catan_page.html')",
+      "Bash(npm install *)"
     ]
   }
 }
